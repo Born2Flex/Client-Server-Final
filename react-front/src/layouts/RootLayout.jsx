@@ -1,12 +1,13 @@
 import React from 'react'
-import { Outlet, redirect, useLoaderData } from 'react-router-dom';
+import { Outlet, useLoaderData, redirect } from 'react-router-dom';
 import NavBar from '../components/NavBar'
 import styles from './RootLayout.module.css';
 
 function RootLayout() {
+    const { token } = useLoaderData();
     return (
         <div className={styles.root}>
-            <NavBar />
+            <NavBar token={token} />
             <main className={styles.main}>
                 <Outlet />
             </main>
@@ -15,3 +16,11 @@ function RootLayout() {
 }
 
 export default RootLayout
+
+export async function loader() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        return { token: null };
+    }
+    return { token };
+}

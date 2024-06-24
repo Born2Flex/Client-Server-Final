@@ -1,8 +1,8 @@
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import RootLayout from './layouts/RootLayout';
+import RootLayout, { loader as rootLoader } from './layouts/RootLayout';
 import ErrorPage from './pages/ErrorPage';
 import HomePage from './pages/HomePage';
-import LoginPage from './pages/LoginPage';
+import LoginPage, { loginAction, logOutAction } from './pages/LoginPage';
 import ProductsPage from './pages/products/ProductsPage';
 import ProductPage from './pages/products/ProductPage';
 import CategoriesPage from './pages/categories/CategoriesPage';
@@ -14,13 +14,18 @@ function App() {
       path: '/',
       element: <RootLayout />,
       errorElement: <ErrorPage />,
+      loader: rootLoader,
       id: 'root',
       children: [
         { index: true, element: <HomePage /> },
         {
           path: 'login',
           element: <LoginPage />,
-          // action: loginAction,
+          action: loginAction,
+        },
+        {
+          path: 'logout',
+          action: logOutAction,
         },
         {
           path: 'products',
