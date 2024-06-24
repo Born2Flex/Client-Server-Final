@@ -1,6 +1,6 @@
 package ua.edu.ukma.services;
 
-import ua.edu.ukma.dto.login.LoginRequest;
+import ua.edu.ukma.dto.login.LoginRequestDto;
 import ua.edu.ukma.exceptions.UnauthorisedException;
 
 public class AuthService {
@@ -10,7 +10,7 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
-    public String login(LoginRequest loginRequest) {
+    public String login(LoginRequestDto loginRequest) {
         if ("user".equals(loginRequest.getUsername()) && "password".equals(loginRequest.getPassword())) {
             System.out.println("User authenticated successfully");
             return jwtService.generateToken(1L);

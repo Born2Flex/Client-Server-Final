@@ -22,17 +22,17 @@ public class GoodsService {
     }
 
     public List<ProductDto> getAllProducts() {
-        return productRepository.findAll().stream().map(ProductDto::new).toList();
+        return productRepository.findAllProducts().stream().map(ProductDto::new).toList();
     }
 
     public ProductDto createProduct(ProductCreationDto productDto) {
-        if (productRepository.findByName(productDto.getName()).isPresent()) {
+        if (productRepository.findProductByName(productDto.getName()).isPresent()) {
             throw new ConstraintViolationException("Product with such name already exists");
         }
         if (productDto.getAmount() < 0 || productDto.getPrice() <= 0) {
             throw new ConstraintViolationException("Invalid product data");
         }
-        Product product = productRepository.saveProduct(productDto);
+        Product product = productRepository.createProduct(productDto);
         return new ProductDto(product);
     }
 
@@ -40,7 +40,7 @@ public class GoodsService {
         if (productDto.getAmount() < 0 || productDto.getPrice() <= 0) {
             throw new ConstraintViolationException("Invalid product data");
         }
-        Optional<Product> productOptional = productRepository.findByName(productDto.getName());
+        Optional<Product> productOptional = productRepository.findProductByName(productDto.getName());
         if (productOptional.isPresent() && !productId.equals(productOptional.get().getId())) {
             throw new ConstraintViolationException("Product with such name already exists");
         }
