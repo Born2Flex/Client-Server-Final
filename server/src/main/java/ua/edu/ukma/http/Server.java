@@ -1,7 +1,6 @@
 package ua.edu.ukma.http;
 
-import com.sun.net.httpserver.HttpContext;
-import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.*;
 import ua.edu.ukma.auth.JwtAuthenticator;
 import ua.edu.ukma.controllers.AuthController;
 import ua.edu.ukma.controllers.CategoryController;
@@ -14,8 +13,10 @@ import ua.edu.ukma.repositories.CategoryRepository;
 import ua.edu.ukma.repositories.ProductRepository;
 import ua.edu.ukma.services.*;
 
+import javax.net.ssl.*;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.security.KeyStore;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 
@@ -45,21 +46,45 @@ public class Server extends Thread {
 
             JsonMapper mapper = new JsonMapper();
 
-//          Creating HttpServer
             JwtAuthenticator jwtAuthenticator = new JwtAuthenticator(jwtService);
             RequestRouter router = new RequestRouter(new AuthController(authService, mapper),
-                                                    new ProductController(productService, mapper),
-                                                    new CategoryController(categoryService, mapper));
+                    new ProductController(productService, mapper),
+                    new CategoryController(categoryService, mapper));
 
-            HttpServer server = HttpServer.create();
-            server.bind(new InetSocketAddress(port), 0);
+            HttpsServer server = HttpsServer.create(new InetSocketAddress(port), 0);
             HttpContext context = server.createContext("/api", router);
+
+            char[] password = properties.getProperty("keystorePassword").toCharArray();
+            KeyStore keyStore = KeyStore.getInstance("JKS");
+            keyStore.load(Server.class.getResourceAsStream("/keystore.jks"), password);
+
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+            kmf.init(keyStore, password);
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+            tmf.init(keyStore);
+
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+
+            server.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
+                @Override
+                public void configure(HttpsParameters params) {
+                    SSLContext context = getSSLContext();
+                    SSLEngine engine = context.createSSLEngine();
+                    params.setNeedClientAuth(false);
+                    params.setCipherSuites(engine.getEnabledCipherSuites());
+                    params.setProtocols(engine.getEnabledProtocols());
+
+                    SSLParameters sslParameters = engine.getSSLParameters();
+                    params.setSSLParameters(sslParameters);
+                }
+            });
+
             context.setAuthenticator(jwtAuthenticator);
             server.setExecutor(Executors.newFixedThreadPool(numOfThreads));
             server.start();
-
-            System.out.println("Http server started on port " + port);
-        } catch (IOException e) {
+            System.out.println("Https server started on port " + port);
+        } catch (Exception e) {
             throw new RuntimeException("Failed to start server", e);
         }
     }

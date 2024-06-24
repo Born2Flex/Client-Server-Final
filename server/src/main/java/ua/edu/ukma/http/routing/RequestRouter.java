@@ -14,7 +14,7 @@ public class RequestRouter extends BaseController implements HttpHandler {
     public RequestRouter(AuthController authController,
                          ProductController productController,
                          CategoryController categoryController) {
-        routes.put(new Request("/api/login", "POST"), authController::authorise);
+        routes.put(new Request("/api/login", "POST"), authController::authorize);
 
         routes.put(new Request("/api/products", "GET"), productController::findAllProducts);
         routes.put(new Request("/api/products/\\d+", "GET"), productController::findProductById);
@@ -30,13 +30,16 @@ public class RequestRouter extends BaseController implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) {
+        System.out.println("Received request: " + exchange.getRequestURI());
         String uri = exchange.getRequestURI().getPath();
         String method = exchange.getRequestMethod();
         RequestHandler handler = routes.get(new Request(uri, method));
         try {
             if (handler == null) {
+                System.out.println("Appropriate handler not found!");
                 setResponseBody(exchange, 405);
             } else {
+                System.out.println("Found appropriate handler!");
                 handler.handleRequest(exchange);
             }
         } catch (ResponseStatusException e) {
