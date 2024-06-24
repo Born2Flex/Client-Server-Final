@@ -9,7 +9,7 @@ import ua.edu.ukma.db.DBConnector;
 import ua.edu.ukma.properties.PropertiesLoader;
 import ua.edu.ukma.repositories.ProductRepository;
 import ua.edu.ukma.services.AuthService;
-import ua.edu.ukma.services.GoodsService;
+import ua.edu.ukma.services.ProductService;
 import ua.edu.ukma.services.JsonMapper;
 import ua.edu.ukma.services.JwtService;
 
@@ -24,7 +24,7 @@ public class RequestRouter implements HttpHandler {
     public RequestRouter() {
         DBConnector connector = new DBConnector(new PropertiesLoader().loadProperties());
         routes.put("login", new AuthController(new AuthService(new JwtService()), new JsonMapper()));
-        routes.put("good", new GoodsController(new GoodsService(new ProductRepository(connector.getConnection())), new JsonMapper()));
+        routes.put("good", new GoodsController(new ProductService(new ProductRepository(connector.getConnection())), new JsonMapper()));
     }
 
     @Override

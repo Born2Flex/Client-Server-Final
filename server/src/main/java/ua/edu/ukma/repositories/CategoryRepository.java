@@ -15,6 +15,7 @@ public class CategoryRepository {
     private static final String UPDATE_CATEGORY = "UPDATE categories SET name = ?, description = ? WHERE id = ?";
     private static final String DELETE_CATEGORY = "DELETE FROM categories WHERE id = ?";
     private static final String FIND_ALL_CATEGORIES = "SELECT * FROM categories";
+    private static final String FIND_CATEGORY_BY_ID = "SELECT * FROM categories WHERE id = ?";
     private static final String FIND_CATEGORY_BY_NAME = "SELECT * FROM categories WHERE name ILIKE ?";
     private static final String FIND_ALL_CATEGORIES_WITH_PRICE = """
     SELECT categories.id, categories.name, categories.description, SUM(products.amount * products.price) AS price
@@ -56,7 +57,7 @@ public class CategoryRepository {
         }
     }
 
-    public Category updateCategory(int categoryId, CategoryUpdateDto categoryDto) {
+    public Category updateCategory(int categoryId, Category categoryDto) {
         try (PreparedStatement statement = connection.prepareStatement(UPDATE_CATEGORY)) {
             statement.setString(1, categoryDto.getName());
             statement.setString(2, categoryDto.getDescription());
@@ -94,6 +95,19 @@ public class CategoryRepository {
             return Optional.empty();
         } catch (SQLException e) {
             throw new RuntimeException("Error finding categories by name", e);
+        }
+    }
+
+    public Optional<Category> findCategoryById(Integer id) {
+        try (PreparedStatement statement = connection.prepareStatement(FIND_CATEGORY_BY_ID)) {
+            statement.setInt(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return Optional.of(mapToCategory(resultSet));
+            }
+            return Optional.empty();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error finding category by id", e);
         }
     }
 

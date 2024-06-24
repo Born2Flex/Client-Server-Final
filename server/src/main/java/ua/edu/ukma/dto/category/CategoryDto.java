@@ -1,5 +1,7 @@
 package ua.edu.ukma.dto.category;
 
+import ua.edu.ukma.entities.Category;
+
 public class CategoryDto {
     private Integer id;
     private String name;
@@ -12,6 +14,12 @@ public class CategoryDto {
         this.id = id;
         this.name = name;
         this.description = description;
+    }
+
+    public CategoryDto(Category category) {
+        this.id = category.getId();
+        this.name = category.getName();
+        this.description = category.getDescription();
     }
 
     public Integer getId() {
