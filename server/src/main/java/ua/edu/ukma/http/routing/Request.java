@@ -16,13 +16,11 @@ public class Request {
         if (this == object) return true;
         if (!(object instanceof Request request)) return false;
 
-        return request.uri.matches(uri) && method.equals(request.method);
+        return method.equals(request.method) && uri.matches(request.uri);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hashCode(uri);
-        result = 31 * result + Objects.hashCode(method);
-        return result;
+        return Objects.hashCode(method);
     }
 }
