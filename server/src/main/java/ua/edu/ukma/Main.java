@@ -1,7 +1,10 @@
 package ua.edu.ukma;
 
+import ua.edu.ukma.http.Server;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+        Server server = new Server(8080, 5);
+        server.start();
     }
 }
