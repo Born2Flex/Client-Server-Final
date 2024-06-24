@@ -10,42 +10,26 @@ import java.io.OutputStream;
 import java.util.stream.Collectors;
 
 public class BaseController {
-    public void handleRequest(HttpExchange exchange) throws IOException {
-        String method = exchange.getRequestMethod();
-        System.out.println("Request method: " + method);
-        try {
-            switch (method) {
-                case "GET" -> processGet(exchange);
-                case "POST" -> processPost(exchange);
-                case "PUT" -> processPut(exchange);
-                case "DELETE" -> processDelete(exchange);
-                default -> methodNotAllowed(exchange);
-            }
-        } catch (ResponseStatusException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            setResponseBody(exchange, e.getMessage(), e.getStatusCode());
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    protected void processGet(HttpExchange exchange) throws IOException {
-        methodNotAllowed(exchange);
-    }
-
-    protected void processPost(HttpExchange exchange) throws IOException {
-        methodNotAllowed(exchange);
-    }
-
-    protected void processPut(HttpExchange exchange) throws IOException {
-        methodNotAllowed(exchange);
-    }
-
-    protected void processDelete(HttpExchange exchange) throws IOException {
-        methodNotAllowed(exchange);
-    }
+//    public void handleRequest(HttpExchange exchange) throws IOException {
+//        String method = exchange.getRequestMethod();
+//        System.out.println("Request method: " + method);
+//        try {
+//            switch (method) {
+//                case "GET" -> processGet(exchange);
+//                case "POST" -> processPost(exchange);
+//                case "PUT" -> processPut(exchange);
+//                case "DELETE" -> processDelete(exchange);
+//                default -> methodNotAllowed(exchange);
+//            }
+//        } catch (ResponseStatusException e) {
+//            System.out.println(e.getMessage());
+//            e.printStackTrace();
+//            setResponseBody(exchange, e.getMessage(), e.getStatusCode());
+//        } catch (Exception e) {
+//            System.out.println(e.getMessage());
+//            e.printStackTrace();
+//        }
+//    }
 
     protected String getRequestBody(HttpExchange exchange) {
         return new BufferedReader(new InputStreamReader(exchange.getRequestBody()))
@@ -73,8 +57,12 @@ public class BaseController {
         throw new RuntimeException();
     }
 
-    protected void setResponseBody(HttpExchange exchange, int statusCode) throws IOException {
-        exchange.sendResponseHeaders(statusCode, -1);
+    protected void setResponseBody(HttpExchange exchange, int statusCode) {
+        try {
+            exchange.sendResponseHeaders(statusCode, -1);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void methodNotAllowed(HttpExchange exchange) throws IOException {

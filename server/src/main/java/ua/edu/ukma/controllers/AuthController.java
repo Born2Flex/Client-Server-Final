@@ -14,8 +14,7 @@ public class AuthController extends BaseController {
         this.mapper = mapper;
     }
 
-    @Override
-    protected void processPost(HttpExchange exchange) {
+    public void authorise(HttpExchange exchange) {
         System.out.println("Processing login request on AuthController");
         String requestBody = getRequestBody(exchange);
         LoginRequestDto loginRequest = mapper.parseObject(requestBody, LoginRequestDto.class);
