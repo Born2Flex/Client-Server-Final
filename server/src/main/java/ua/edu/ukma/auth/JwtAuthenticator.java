@@ -19,20 +19,25 @@ public class JwtAuthenticator extends Authenticator {
 
     @Override
     public Result authenticate(HttpExchange exchange) {
+        System.out.println("Authenticating request: " + exchange.getRequestURI());
         if (exchange.getRequestURI().getPath().equals("/api/login")) {
+            System.out.println("Request authenticated: Permit all URI");
             return new Success(new HttpPrincipal("user", ""));
         }
 
         Headers headers = exchange.getRequestHeaders();
         String authHeader = headers.getFirst("Authorization");
         if (authHeader == null || !authHeader.startsWith(BEARER_HEADER)) {
+            System.out.println("Request unauthorized: Missing Bearer header");
             return unauthorizedResponse(exchange, "Missing Authorization header");
         }
 
         String token = authHeader.substring(BEARER_HEADER.length());
         if (jwtService.isExpired(token)) {
+            System.out.println("Request unauthorized: Token expired");
             return unauthorizedResponse(exchange, "Token is expired or invalid");
         }
+        System.out.println("Request authenticated: Valid JWT token");
         return new Success(new HttpPrincipal("user", ""));
     }
 
