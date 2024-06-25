@@ -15,6 +15,7 @@ public class ProductRepository {
     private static final String FIND_ALL_PRODUCTS = "SELECT * FROM products";
     private static final String FIND_BY_ID = "SELECT * FROM products WHERE id = ?";
     private static final String FIND_BY_NAME_LIKE = "SELECT * FROM products WHERE name ILIKE ?";
+    private static final String FIND_BY_NAME_STARTS_WITH = "SELECT * FROM products WHERE name ILIKE ?";
     private static final String UPDATE_PRODUCT = "UPDATE products SET name = ?, description = ?, producer = ?, price = ?, amount = ? WHERE id = ?";
     private static final String DELETE_PRODUCT = "DELETE FROM products WHERE id = ?";
     private static final String FIND_ALL_PRODUCTS_EXT = """
@@ -29,6 +30,13 @@ public class ProductRepository {
             INNER JOIN categories
             ON products.category_id = categories.id
             GROUP BY products.id, products.name, products.description, products.producer, products.amount, products.price, categories.name
+            """;
+    private static final String FIND_ALL_CATEGORY_PRODUCTS = """
+            SELECT products.id, products.name, products.description, products.producer, products.amount, products.price, categories.name AS category_name, products.amount * products.price AS total_price
+            FROM products
+            INNER JOIN categories
+            ON categories.id = products.category_id
+            WHERE categories.id = ?
             """;
 
     private final Connection connection;
@@ -68,6 +76,15 @@ public class ProductRepository {
         }
     }
 
+    public List<ProductExtDto> findAllProductsByCategory(Integer categoryId) {
+        try (PreparedStatement statement = connection.prepareStatement(FIND_ALL_CATEGORY_PRODUCTS)) {
+            statement.setInt(1, categoryId);
+            return mapToProductsListExt(statement.executeQuery());
+        } catch (SQLException e) {
+            throw new RuntimeException("Error finding all products ext",e);
+        }
+    }
+
     public List<ProductExtDto> findAllProductsExt() {
         try (Statement statement = connection.createStatement()) {
             return mapToProductsListExt(statement.executeQuery(FIND_ALL_PRODUCTS_EXT));
@@ -94,6 +111,16 @@ public class ProductRepository {
             return Optional.empty();
         } catch (SQLException e) {
             throw new RuntimeException("Error finding products by name",e);
+        }
+    }
+
+    public List<Product> findProductsWhereNameLike(String name) {
+        try (PreparedStatement statement = connection.prepareStatement(FIND_BY_NAME_STARTS_WITH)) {
+            statement.setString(1, "%" + name + "%");
+            ResultSet resultSet = statement.executeQuery();
+            return mapToProductsList(resultSet);
+        } catch (SQLException e) {
+            throw new RuntimeException("Error finding products where name", e);
         }
     }
 

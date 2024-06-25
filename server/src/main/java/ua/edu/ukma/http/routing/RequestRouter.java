@@ -18,6 +18,7 @@ public class RequestRouter extends BaseController implements HttpHandler {
 
         routes.put(new Request("/api/products", "GET"), productController::findAllProducts);
         routes.put(new Request("/api/products/\\d+", "GET"), productController::findProductById);
+        routes.put(new Request("/api/categories/\\d+/products", "GET"), productController::findAllProductsByCategory);
         routes.put(new Request("/api/products", "POST"), productController::createProduct);
         routes.put(new Request("/api/products/\\d+", "PUT"), productController::updateProduct);
         routes.put(new Request("/api/products/\\d+", "DELETE"), productController::deleteProduct);

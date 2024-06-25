@@ -2,7 +2,7 @@ package ua.edu.ukma.repositories;
 
 import ua.edu.ukma.dto.category.CategoryCreationDto;
 import ua.edu.ukma.dto.category.CategoryPriceDto;
-import ua.edu.ukma.dto.category.CategoryUpdateDto;
+
 import ua.edu.ukma.entities.Category;
 
 import java.sql.*;

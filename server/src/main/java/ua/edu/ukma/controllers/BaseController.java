@@ -1,12 +1,13 @@
 package ua.edu.ukma.controllers;
 
 import com.sun.net.httpserver.HttpExchange;
-import ua.edu.ukma.exceptions.ResponseStatusException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class BaseController {
@@ -42,6 +43,22 @@ public class BaseController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public Map<String, String> queryToMap(String query) {
+        Map<String, String> result = new HashMap<>();
+        if(query == null) {
+            return result;
+        }
+        for (String param : query.split("&")) {
+            String[] entry = param.split("=");
+            if (entry.length > 1) {
+                result.put(entry[0], entry[1]);
+            }else{
+                result.put(entry[0], "");
+            }
+        }
+        return result;
     }
 
     //    public void handleRequest(HttpExchange exchange) throws IOException {
