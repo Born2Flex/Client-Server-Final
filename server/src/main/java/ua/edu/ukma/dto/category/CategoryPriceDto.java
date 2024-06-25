@@ -4,16 +4,16 @@ public class CategoryPriceDto {
     private Integer id;
     private String name;
     private String description;
-    private Double price;
+    private Double totalPrice;
 
     public CategoryPriceDto() {
     }
 
-    public CategoryPriceDto(Integer id, String name, String description, Double price) {
+    public CategoryPriceDto(Integer id, String name, String description, Double totalPrice) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.price = price;
+        this.totalPrice = totalPrice;
     }
 
     public Integer getId() {
@@ -40,11 +40,11 @@ public class CategoryPriceDto {
         this.description = description;
     }
 
-    public Double getPrice() {
-        return price;
+    public Double getTotalPrice() {
+        return totalPrice;
     }
 
-    public void setPrice(Double price) {
-        this.price = price;
+    public void setTotalPrice(Double totalPrice) {
+        this.totalPrice = totalPrice;
     }
 }
