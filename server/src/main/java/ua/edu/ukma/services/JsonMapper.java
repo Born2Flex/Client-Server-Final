@@ -1,11 +1,13 @@
 package ua.edu.ukma.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ua.edu.ukma.exceptions.BadRequestException;
 
 public class JsonMapper {
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     public <T> T parseObject(String json, Class<T> clazz) {
         try {
