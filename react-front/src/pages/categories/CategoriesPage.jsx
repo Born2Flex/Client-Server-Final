@@ -56,6 +56,11 @@ export async function createCategoryAction({ request }) {
         const responseData = await response.text();
         console.log('Create category response:', responseData);
 
+        if (response.status === 409) {
+            console.log("returning error")
+            return { error: true, message: responseData };
+        }
+
         if (!response.ok) {
             console.error(`Error ${response.status}: ${responseData}`);
             throw new Error(`Error ${response.status}: ${responseData}`);
@@ -66,12 +71,22 @@ export async function createCategoryAction({ request }) {
         console.error('Error creating category:', error);
     }
 
+    window.location.reload();
     return redirect('/categories');
 }
 
-export async function categoriesLoader() {
+export async function categoriesLoader({ request }) {
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+        return redirect('/login');
+    }
+
+    const url = new URL(request.url);
+    const search = url.searchParams.get("name");
+
     try {
-        const response = await fetch(`/api/categories`, {
+        const response = await fetch(`/api/categories${search ? '?name=' + search : ''}`, {
             headers: {
                 'Authorization': 'Bearer ' + localStorage.getItem('token')
             }

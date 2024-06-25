@@ -26,9 +26,9 @@ public class CategoryRepository {
     GROUP BY categories.id, categories.name, categories.description
     """;
     private static final String FIND_CATEGORY_WITH_PRICE = """
-    SELECT categories.id, categories.name, categories.description, SUM(products.amount * products.price) AS price
+    SELECT categories.id, categories.name, categories.description, SUM(COALESCE(products.amount, 0) * COALESCE(products.price, 0)) AS price
     FROM categories
-    INNER JOIN products
+    LEFT JOIN products
     ON categories.id = products.category_id
     WHERE categories.id = ?
     GROUP BY categories.id, categories.name, categories.description

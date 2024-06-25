@@ -61,6 +61,11 @@ export async function createProductAction({ request }) {
         const responseData = await response.text();
         console.log('Create product response:', responseData);
 
+        if (response.status === 409) {
+            console.log("returning error")
+            return { error: true, message: responseData };
+        }
+
         if (!response.ok) {
             console.error(`Error ${response.status}: ${responseData}`);
             throw new Error(`Error ${response.status}: ${responseData}`);
@@ -71,12 +76,21 @@ export async function createProductAction({ request }) {
         console.error('Error creating product:', error);
     }
 
+    window.location.reload();
     return redirect('/products');
 }
 
-export async function productsLoader() {
+export async function productsLoader({ request }) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        return redirect('/login');
+    }
+
+    const url = new URL(request.url);
+    const search = url.searchParams.get("name");
+
     try {
-        const productsResponse = await fetch(`/api/products`, {
+        const productsResponse = await fetch(`/api/products${search ? '?name=' + search : ''}`, {
             headers: {
                 'Authorization': 'Bearer ' + localStorage.getItem('token')
             }

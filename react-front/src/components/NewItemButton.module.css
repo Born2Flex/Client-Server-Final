@@ -50,7 +50,8 @@
 .input {
     width: 100%;
     padding: 10px;
-    margin-bottom: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 16px;
@@ -59,6 +60,7 @@
 .submitButton {
     width: 100%;
     padding: 10px;
+    margin-top: 10px;
     background-color: #4CAF50;
     color: white;
     border: none;

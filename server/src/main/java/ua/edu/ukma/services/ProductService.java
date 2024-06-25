@@ -78,10 +78,6 @@ public class ProductService {
         return productRepository.findProductsWhereNameLike(productName).stream().map(ProductDto::new).toList();
     }
 
-    public ProductDto findProductById(Integer productId) {
-        return new ProductDto(findProductOrThrow(productId));
-    }
-
     public ProductPriceDto findProductWithPriceById(Integer productId) {
         Optional<ProductPriceDto> product = productRepository.findProductWithPriceById(productId);
         if (product.isPresent()) {

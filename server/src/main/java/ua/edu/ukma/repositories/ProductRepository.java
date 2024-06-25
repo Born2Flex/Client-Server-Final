@@ -1,7 +1,6 @@
 package ua.edu.ukma.repositories;
 
 import ua.edu.ukma.dto.product.ProductCreationDto;
-import ua.edu.ukma.dto.product.ProductExtDto;
 import ua.edu.ukma.dto.product.ProductPriceDto;
 import ua.edu.ukma.entities.Product;
 
@@ -18,12 +17,6 @@ public class ProductRepository {
     private static final String FIND_BY_NAME_STARTS_WITH = "SELECT * FROM products WHERE name ILIKE ?";
     private static final String UPDATE_PRODUCT = "UPDATE products SET name = ?, description = ?, producer = ?, amount = ?, price = ?, category_id = ? WHERE id = ?";
     private static final String DELETE_PRODUCT = "DELETE FROM products WHERE id = ?";
-    private static final String FIND_ALL_PRODUCTS_EXT = """
-            SELECT products.id, products.name, products.description, products.producer, products.amount, products.price, categories.name AS category_name
-            FROM products
-            INNER JOIN categories
-            ON products.category_id = categories.id
-            """;
     private static final String FIND_ALL_PRODUCTS_WITH_PRICE = """
             SELECT products.id, products.name, products.description, products.producer, products.amount, products.price, categories.name AS category_name, products.amount * products.price AS total_price
             FROM products
@@ -88,14 +81,6 @@ public class ProductRepository {
         try (PreparedStatement statement = connection.prepareStatement(FIND_ALL_CATEGORY_PRODUCTS)) {
             statement.setInt(1, categoryId);
             return mapToProductsList(statement.executeQuery());
-        } catch (SQLException e) {
-            throw new RuntimeException("Error finding all products ext", e);
-        }
-    }
-
-    public List<ProductExtDto> findAllProductsExt() {
-        try (Statement statement = connection.createStatement()) {
-            return mapToProductsListExt(statement.executeQuery(FIND_ALL_PRODUCTS_EXT));
         } catch (SQLException e) {
             throw new RuntimeException("Error finding all products ext", e);
         }
@@ -190,14 +175,6 @@ public class ProductRepository {
         return products;
     }
 
-    private List<ProductExtDto> mapToProductsListExt(ResultSet resultSet) throws SQLException {
-        List<ProductExtDto> products = new ArrayList<>();
-        while (resultSet.next()) {
-            products.add(mapToProductExt(resultSet));
-        }
-        return products;
-    }
-
     private List<ProductPriceDto> mapToProductsPriceList(ResultSet resultSet) throws SQLException {
         List<ProductPriceDto> products = new ArrayList<>();
         while (resultSet.next()) {
@@ -216,17 +193,6 @@ public class ProductRepository {
         String categoryName = resultSet.getString("category_name");
         double totalPrice = resultSet.getDouble("total_price");
         return new ProductPriceDto(id, name, description, producer, price, amount, categoryName, totalPrice);
-    }
-
-    private ProductExtDto mapToProductExt(ResultSet resultSet) throws SQLException {
-        int id = resultSet.getInt("id");
-        String name = resultSet.getString("name");
-        String description = resultSet.getString("description");
-        String producer = resultSet.getString("producer");
-        int amount = resultSet.getInt("amount");
-        double price = resultSet.getDouble("price");
-        String categoryName = resultSet.getString("category_name");
-        return new ProductExtDto(id, name, description, producer, price, amount, categoryName);
     }
 
     private Product mapToProduct(ResultSet resultSet) throws SQLException {
