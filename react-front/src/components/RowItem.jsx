@@ -46,7 +46,7 @@ function RowItem({ item, categoriesForDropdown = null }) {
         if (e.target.value === '' || e.target.value === null) {
             e.target.value = ''
         }
-        else if (e.target.value < e.target.min) {
+        else if (Number(e.target.value) < Number(e.target.min)) {
             e.target.value = e.target.min;
         }
         const { name, value } = e.target;
@@ -60,7 +60,7 @@ function RowItem({ item, categoriesForDropdown = null }) {
     const handleSaveClick = async () => {
         try {
             const { id, ...dataWithoutId } = itemData;
-            const response = await fetch(`/api/${itemType}/${itemData.id}`, {
+            const response = await fetch(`/api/${itemType}/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -71,12 +71,15 @@ function RowItem({ item, categoriesForDropdown = null }) {
             console.log('Save item response:', response);
             const responseData = await response.text();
             console.log(responseData)
+
             if (response.status === 409) {
                 console.log("returning error")
                 setError(responseData);
                 return;
             }
+
             setIsEditing(false);
+            window.location.reload();
 
         }
         catch (error) {
@@ -103,7 +106,10 @@ function RowItem({ item, categoriesForDropdown = null }) {
                             <>
                                 <td><input name="producer" minLength={1} value={itemData.producer} onChange={handleChange} /></td>
                                 <td><input type='number' min={0.01} name="price" value={itemData.price} onChange={validateMin} /></td>
-                                <td><input type='number' min={0} name="amount" value={itemData.amount} onChange={validateMin} /></td>
+                                <td>
+                                    <p className={styles.smallText}>Add/Write off</p>
+                                    <input type='number' min={-1 * itemData.amount} name="increment" value={itemData.increment} onChange={validateMin} />
+                                </td>
                                 <td>
                                     <select name='categoryId' value={itemData.categoryId} onChange={handleChange}>
                                         {categoriesForDropdown.map(category => (
