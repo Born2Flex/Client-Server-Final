@@ -16,7 +16,7 @@ public class ProductRepository {
     private static final String FIND_BY_ID = "SELECT * FROM products WHERE id = ?";
     private static final String FIND_BY_NAME_LIKE = "SELECT * FROM products WHERE name ILIKE ?";
     private static final String FIND_BY_NAME_STARTS_WITH = "SELECT * FROM products WHERE name ILIKE ?";
-    private static final String UPDATE_PRODUCT = "UPDATE products SET name = ?, description = ?, producer = ?, price = ?, amount = ? WHERE id = ?";
+    private static final String UPDATE_PRODUCT = "UPDATE products SET name = ?, description = ?, producer = ?, amount = ?, price = ?, category_id = ? WHERE id = ?";
     private static final String DELETE_PRODUCT = "DELETE FROM products WHERE id = ?";
     private static final String FIND_ALL_PRODUCTS_EXT = """
             SELECT products.id, products.name, products.description, products.producer, products.amount, products.price, categories.name AS category_name
@@ -144,7 +144,8 @@ public class ProductRepository {
             statement.setString(3, product.getProducer());
             statement.setInt(4, product.getAmount());
             statement.setDouble(5, product.getPrice());
-            statement.setInt(6, product.getId());
+            statement.setInt(6, product.getCategoryId());
+            statement.setInt(7, product.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error updating product",e);
