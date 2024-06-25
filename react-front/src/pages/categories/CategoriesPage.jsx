@@ -1,9 +1,12 @@
 import React from 'react'
+import { useLoaderData, redirect } from 'react-router-dom'
 import NewItemButton from '../../components/NewItemButton'
 import SearchInput from '../../components/SearchInput'
-import styles from './CategoriesPage.module.css'
+import RowItem from '../../components/RowItem';
 
 function CategoriesPage() {
+    const { categories } = useLoaderData();
+
     return (
         <>
             <div className='dashboard'>
@@ -13,40 +16,75 @@ function CategoriesPage() {
             <table className='table'>
                 <thead>
                     <tr>
-                        <th>Category 1</th>
-                        <th>Category 2</th>
-                        <th>Category 3</th>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Row 1, Cell 1</td>
-                        <td>Row 1, Cell 2</td>
-                        <td>Row 1, Cell 3</td>
-                    </tr>
-                    <tr>
-                        <td>Row 2, Cell 1</td>
-                        <td>Row 2, Cell 2</td>
-                        <td>Row 2, Cell 3</td>
-                    </tr>
-                    <tr>
-                        <td>Row 3, Cell 1</td>
-                        <td>Row 3, Cell 2</td>
-                        <td>Row 3, Cell 3</td>
-                    </tr>
-                    <tr>
-                        <td>Row 4, Cell 1</td>
-                        <td>Row 4, Cell 2</td>
-                        <td>Row 4, Cell 3</td>
-                    </tr>
-                    <tr>
-                        <td>Row 5, Cell 1</td>
-                        <td>Row 5, Cell 2</td>
-                        <td>Row 5, Cell 3</td>
-                    </tr>
+                    {categories.map(category => (
+                        <RowItem key={category.id} category={category} />
+                    ))}
                 </tbody>
             </table></>
     )
 }
 
 export default CategoriesPage
+
+export async function createCategoryAction({ request }) {
+    const data = await request.formData();
+
+    const categoryData = {
+        name: data.get('name'),
+        description: data.get('description'),
+    };
+    console.log('Category data:', categoryData);
+
+    try {
+        const response = await fetch(`/api/categories`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            },
+            body: JSON.stringify(categoryData)
+        });
+        const responseData = await response.text();
+        console.log('Create category response:', responseData);
+
+        if (!response.ok) {
+            console.error(`Error ${response.status}: ${responseData}`);
+            throw new Error(`Error ${response.status}: ${responseData}`);
+        }
+
+        console.log('Category created successfully:', responseData);
+    } catch (error) {
+        console.error('Error creating category:', error);
+    }
+
+    return redirect('/categories');
+}
+
+export async function categoriesLoader() {
+    try {
+        const response = await fetch(`/api/categories`, {
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            }
+        });
+        const responseData = await response.json();
+        console.log('Categories:', responseData);
+
+        if (!response.ok) {
+            console.error(`Error ${response.status}: ${responseData}`);
+            throw new Error(`Error ${response.status}: ${responseData}`);
+        }
+
+        return { categories: responseData };
+    }
+    catch (error) {
+        console.error('Error loading categories:', error);
+    }
+}

@@ -5,7 +5,7 @@ import HomePage from './pages/HomePage';
 import LoginPage, { loginAction, logOutAction } from './pages/LoginPage';
 import ProductsPage from './pages/products/ProductsPage';
 import ProductPage from './pages/products/ProductPage';
-import CategoriesPage from './pages/categories/CategoriesPage';
+import CategoriesPage, { createCategoryAction, categoriesLoader } from './pages/categories/CategoriesPage';
 import CategoryPage from './pages/categories/CategoryPage';
 
 function App() {
@@ -46,10 +46,13 @@ function App() {
         },
         {
           path: 'categories',
-          element: <CategoriesPage />,
-          // loader: categoriesLoader,
           // action: searchCategoryAction,
           children: [
+            {
+              index: true,
+              element: <CategoriesPage />,
+              loader: categoriesLoader,
+            },
             {
               path: ':id',
               element: <CategoryPage />,
@@ -57,7 +60,7 @@ function App() {
             },
             {
               path: 'new',
-              // action: createCategoryAction,
+              action: createCategoryAction,
             }
           ]
         },
