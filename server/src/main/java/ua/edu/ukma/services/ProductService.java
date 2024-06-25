@@ -2,7 +2,6 @@ package ua.edu.ukma.services;
 
 import ua.edu.ukma.dto.product.ProductCreationDto;
 import ua.edu.ukma.dto.product.ProductDto;
-import ua.edu.ukma.dto.product.ProductExtDto;
 import ua.edu.ukma.dto.product.ProductPriceDto;
 import ua.edu.ukma.entities.Product;
 import ua.edu.ukma.exceptions.ConstraintViolationException;
@@ -71,8 +70,8 @@ public class ProductService {
         return productRepository.findAllProductsWithPrice();
     }
 
-    public List<ProductExtDto> findAllProductsByCategory(Integer categoryId) {
-        return productRepository.findAllProductsByCategory(categoryId);
+    public List<ProductDto> findAllProductsByCategory(Integer categoryId) {
+        return productRepository.findAllProductsByCategory(categoryId).stream().map(ProductDto::new).toList();
     }
 
     public List<ProductDto> findAllProductsWithNameLike(String productName) {

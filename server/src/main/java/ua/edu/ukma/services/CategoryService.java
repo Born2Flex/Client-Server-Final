@@ -1,6 +1,7 @@
 package ua.edu.ukma.services;
 
 import ua.edu.ukma.dto.category.*;
+import ua.edu.ukma.dto.product.ProductDto;
 import ua.edu.ukma.entities.Category;
 
 import ua.edu.ukma.exceptions.ConstraintViolationException;
@@ -61,7 +62,7 @@ public class CategoryService {
         Optional<CategoryPriceDto> category = categoryRepository.findCategoryWithPriceById(categoryId);
         if (category.isPresent()) {
             CategoryFullDto categoryFullDto = new CategoryFullDto(category.get());
-            categoryFullDto.setProducts(productRepository.findAllProductsByCategory(categoryId));
+            categoryFullDto.setProducts(productRepository.findAllProductsByCategory(categoryId).stream().map(ProductDto::new).toList());
             return categoryFullDto;
         }
         throw new EntityNotFountException("Category with such id does not exist");

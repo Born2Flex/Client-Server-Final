@@ -40,7 +40,7 @@ public class ProductRepository {
             GROUP BY products.id, products.name, products.description, products.producer, products.amount, products.price, categories.name
             """;
     private static final String FIND_ALL_CATEGORY_PRODUCTS = """
-            SELECT products.id, products.name, products.description, products.producer, products.amount, products.price, categories.name AS category_name, products.amount * products.price AS total_price
+            SELECT *
             FROM products
             INNER JOIN categories
             ON categories.id = products.category_id
@@ -84,12 +84,12 @@ public class ProductRepository {
         }
     }
 
-    public List<ProductExtDto> findAllProductsByCategory(Integer categoryId) {
+    public List<Product> findAllProductsByCategory(Integer categoryId) {
         try (PreparedStatement statement = connection.prepareStatement(FIND_ALL_CATEGORY_PRODUCTS)) {
             statement.setInt(1, categoryId);
-            return mapToProductsListExt(statement.executeQuery());
+            return mapToProductsList(statement.executeQuery());
         } catch (SQLException e) {
-            throw new RuntimeException("Error finding all products ext",e);
+            throw new RuntimeException("Error finding all products ext", e);
         }
     }
 
@@ -97,7 +97,7 @@ public class ProductRepository {
         try (Statement statement = connection.createStatement()) {
             return mapToProductsListExt(statement.executeQuery(FIND_ALL_PRODUCTS_EXT));
         } catch (SQLException e) {
-            throw new RuntimeException("Error finding all products ext",e);
+            throw new RuntimeException("Error finding all products ext", e);
         }
     }
 
@@ -105,7 +105,7 @@ public class ProductRepository {
         try (Statement statement = connection.createStatement()) {
             return mapToProductsPriceList(statement.executeQuery(FIND_ALL_PRODUCTS_WITH_PRICE));
         } catch (SQLException e) {
-            throw new RuntimeException("Error finding all products with price",e);
+            throw new RuntimeException("Error finding all products with price", e);
         }
     }
 
@@ -118,7 +118,7 @@ public class ProductRepository {
             }
             return Optional.empty();
         } catch (SQLException e) {
-            throw new RuntimeException("Error finding products by name",e);
+            throw new RuntimeException("Error finding products by name", e);
         }
     }
 
@@ -141,7 +141,7 @@ public class ProductRepository {
             }
             return Optional.empty();
         } catch (SQLException e) {
-            throw new RuntimeException("Error finding product by id",e);
+            throw new RuntimeException("Error finding product by id", e);
         }
     }
 
@@ -154,7 +154,7 @@ public class ProductRepository {
             }
             return Optional.empty();
         } catch (SQLException e) {
-            throw new RuntimeException("Error finding product by id",e);
+            throw new RuntimeException("Error finding product by id", e);
         }
     }
 
@@ -169,7 +169,7 @@ public class ProductRepository {
             statement.setInt(7, product.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Error updating product",e);
+            throw new RuntimeException("Error updating product", e);
         }
     }
 

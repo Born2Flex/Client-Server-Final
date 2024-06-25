@@ -3,7 +3,6 @@ package ua.edu.ukma.controllers;
 import com.sun.net.httpserver.HttpExchange;
 import ua.edu.ukma.dto.product.ProductCreationDto;
 import ua.edu.ukma.dto.product.ProductDto;
-import ua.edu.ukma.dto.product.ProductExtDto;
 import ua.edu.ukma.dto.product.ProductPriceDto;
 import ua.edu.ukma.services.JsonMapper;
 import ua.edu.ukma.services.ProductService;
@@ -52,7 +51,7 @@ public class ProductController extends BaseController {
     public void findAllProductsByCategory(HttpExchange exchange) {
         System.out.println("Processing GET request on ProductController");
         Integer categoryId = getPathVariableOrThrow(exchange, 3);
-        List<ProductExtDto> products = productService.findAllProductsByCategory(categoryId);
+        List<ProductDto> products = productService.findAllProductsByCategory(categoryId);
         setResponseBody(exchange, mapper.toJson(products), 200);
     }
 

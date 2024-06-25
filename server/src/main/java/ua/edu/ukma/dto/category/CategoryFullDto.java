@@ -1,7 +1,6 @@
 package ua.edu.ukma.dto.category;
 
-import ua.edu.ukma.dto.product.ProductExtDto;
-import ua.edu.ukma.dto.product.ProductPriceDto;
+import ua.edu.ukma.dto.product.ProductDto;
 
 import java.util.List;
 
@@ -10,7 +9,7 @@ public class CategoryFullDto {
     private String name;
     private String description;
     private Double totalPrice;
-    private List<ProductExtDto> products;
+    private List<ProductDto> products;
 
     public CategoryFullDto() {
     }
@@ -61,11 +60,11 @@ public class CategoryFullDto {
         this.totalPrice = totalPrice;
     }
 
-    public List<ProductExtDto> getProducts() {
+    public List<ProductDto> getProducts() {
         return products;
     }
 
-    public void setProducts(List<ProductExtDto> products) {
+    public void setProducts(List<ProductDto> products) {
         this.products = products;
     }
 }
