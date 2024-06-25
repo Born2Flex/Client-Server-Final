@@ -27,7 +27,7 @@ public class ProductService {
             throw new ConstraintViolationException("Product with such name already exists");
         }
         if (categoryRepository.findCategoryById(productDto.getCategoryId()).isEmpty()) {
-            throw new ConstraintViolationException("Category with such id does not exist");
+            throw new EntityNotFountException("Category with such id does not exist");
         }
         if (productDto.getAmount() < 0 || productDto.getPrice() <= 0) {
             throw new ConstraintViolationException("Invalid product data");
@@ -45,7 +45,7 @@ public class ProductService {
             throw new ConstraintViolationException("Product with such name already exists");
         }
         if (categoryRepository.findCategoryById(productDto.getCategoryId()).isEmpty()) {
-            throw new ConstraintViolationException("Category with such id does not exist");
+            throw new EntityNotFountException("Category with such id does not exist");
         }
         Product product = findProductOrThrow(productId);
         product.setName(productDto.getName());
@@ -53,6 +53,7 @@ public class ProductService {
         product.setProducer(productDto.getProducer());
         product.setPrice(productDto.getPrice());
         product.setAmount(productDto.getAmount());
+        product.setCategoryId(productDto.getCategoryId());
         productRepository.updateProduct(product);
         return new ProductDto(product);
     }
