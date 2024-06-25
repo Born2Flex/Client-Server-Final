@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import ua.edu.ukma.dto.product.ProductCreationDto;
 import ua.edu.ukma.dto.product.ProductDto;
 import ua.edu.ukma.dto.product.ProductPriceDto;
+import ua.edu.ukma.dto.product.ProductUpdateDto;
 import ua.edu.ukma.services.JsonMapper;
 import ua.edu.ukma.services.ProductService;
 import ua.edu.ukma.validator.Validator;
@@ -71,10 +72,10 @@ public class ProductController extends BaseController {
     public void updateProduct(HttpExchange exchange) {
         System.out.println("Processing POST request on ProductController");
         Integer productId = getPathVariableOrThrow(exchange, 3);
-        ProductDto productCreationDto = mapper.parseObject(getRequestBody(exchange), ProductDto.class);
-        List<Violation> violations = validator.validate(productCreationDto);
+        ProductUpdateDto productDto = mapper.parseObject(getRequestBody(exchange), ProductUpdateDto.class);
+        List<Violation> violations = validator.validate(productDto);
         if (violations.isEmpty()) {
-            ProductDto updatedProduct = productService.updateProduct(productId, productCreationDto);
+            ProductDto updatedProduct = productService.updateProduct(productId, productDto);
             setResponseBody(exchange, mapper.toJson(updatedProduct), 200);
         } else {
             setResponseBody(exchange, mapper.toJson(violations), 400);

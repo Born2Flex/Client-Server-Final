@@ -12,6 +12,7 @@ function CategoryPage() {
                 <p>Description: <span className='target-text'>{category.description}</span></p>
                 <p>Total Price: <span className='target-text'>{category.totalPrice}₴</span></p>
             </div>
+            {category.products.length > 0 ?
             <table className='table'>
                 <thead>
                     <tr>
@@ -28,6 +29,7 @@ function CategoryPage() {
                     ))}
                 </tbody>
             </table>
+            : undefined}
         </>
     )
 }

@@ -3,6 +3,7 @@ package ua.edu.ukma.services;
 import ua.edu.ukma.dto.product.ProductCreationDto;
 import ua.edu.ukma.dto.product.ProductDto;
 import ua.edu.ukma.dto.product.ProductPriceDto;
+import ua.edu.ukma.dto.product.ProductUpdateDto;
 import ua.edu.ukma.entities.Product;
 import ua.edu.ukma.exceptions.ConstraintViolationException;
 import ua.edu.ukma.exceptions.EntityNotFountException;
@@ -35,10 +36,7 @@ public class ProductService {
         return new ProductDto(product);
     }
 
-    public ProductDto updateProduct(Integer productId, ProductDto productDto) {
-        if (productDto.getAmount() < 0 || productDto.getPrice() <= 0) {
-            throw new ConstraintViolationException("Invalid product data");
-        }
+    public ProductDto updateProduct(Integer productId, ProductUpdateDto productDto) {
         Optional<Product> productOptional = productRepository.findProductByName(productDto.getName());
         if (productOptional.isPresent() && !productId.equals(productOptional.get().getId())) {
             throw new ConstraintViolationException("Product with such name already exists");
@@ -47,11 +45,14 @@ public class ProductService {
             throw new EntityNotFountException("Category with such id does not exist");
         }
         Product product = findProductOrThrow(productId);
+        if (productDto.getIncrement() < 0 && product.getAmount() + productDto.getIncrement() < 0) {
+            throw new ConstraintViolationException("Can't write off too much products");
+        }
         product.setName(productDto.getName());
         product.setDescription(productDto.getDescription());
         product.setProducer(productDto.getProducer());
         product.setPrice(productDto.getPrice());
-        product.setAmount(productDto.getAmount());
+        product.setAmount(product.getAmount() + productDto.getIncrement());
         product.setCategoryId(productDto.getCategoryId());
         productRepository.updateProduct(product);
         return new ProductDto(product);
