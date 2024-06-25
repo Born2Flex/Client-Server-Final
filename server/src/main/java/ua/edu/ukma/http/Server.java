@@ -40,7 +40,7 @@ public class Server extends Thread {
             CategoryRepository categoryRepository = new CategoryRepository(connector.getConnection());
 
             ProductService productService = new ProductService(productRepository, categoryRepository);
-            CategoryService categoryService = new CategoryService(categoryRepository);
+            CategoryService categoryService = new CategoryService(categoryRepository, productRepository);
             JwtService jwtService = new JwtService();
             AuthService authService = new AuthService(jwtService);
 

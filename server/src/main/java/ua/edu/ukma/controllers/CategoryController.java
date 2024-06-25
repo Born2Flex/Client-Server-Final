@@ -1,10 +1,7 @@
 package ua.edu.ukma.controllers;
 
 import com.sun.net.httpserver.HttpExchange;
-import ua.edu.ukma.dto.category.CategoryCreationDto;
-import ua.edu.ukma.dto.category.CategoryDto;
-import ua.edu.ukma.dto.category.CategoryPriceDto;
-import ua.edu.ukma.dto.category.CategoryUpdateDto;
+import ua.edu.ukma.dto.category.*;
 import ua.edu.ukma.services.CategoryService;
 import ua.edu.ukma.services.JsonMapper;
 import ua.edu.ukma.validator.Validator;
@@ -53,6 +50,13 @@ public class CategoryController extends BaseController {
         System.out.println("Processing GET CATEGORIES WITH PRICE request on CategoryController");
         List<CategoryPriceDto> categories = categoryService.findAllCategoriesWithPrice();
         setResponseBody(exchange, mapper.toJson(categories), 200);
+    }
+
+    public void findCategoryById(HttpExchange exchange) {
+        System.out.println("Processing GET BY ID request on CategoryController");
+        Integer categoryId = getPathVariableOrThrow(exchange, 3);
+        CategoryFullDto category = categoryService.findCategoryWithPrice(categoryId);
+        setResponseBody(exchange, mapper.toJson(category), 200);
     }
 
     public void updateCategory(HttpExchange exchange) {

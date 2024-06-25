@@ -25,6 +25,14 @@ public class CategoryRepository {
     ON categories.id = products.category_id
     GROUP BY categories.id, categories.name, categories.description
     """;
+    private static final String FIND_CATEGORY_WITH_PRICE = """
+    SELECT categories.id, categories.name, categories.description, SUM(products.amount * products.price) AS price
+    FROM categories
+    INNER JOIN products
+    ON categories.id = products.category_id
+    WHERE categories.id = ?
+    GROUP BY categories.id, categories.name, categories.description
+    """;
     private final Connection connection;
 
     public CategoryRepository(Connection connection) {
@@ -83,6 +91,19 @@ public class CategoryRepository {
             return mapToCategoryListWithPrice(statement.executeQuery(FIND_ALL_CATEGORIES_WITH_PRICE));
         } catch (SQLException e) {
             throw new RuntimeException("Error finding all categories with price", e);
+        }
+    }
+
+    public Optional<CategoryPriceDto> findCategoryWithPriceById(Integer categoryId) {
+        try (PreparedStatement statement = connection.prepareStatement(FIND_CATEGORY_WITH_PRICE)) {
+            statement.setInt(1, categoryId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return Optional.of(mapToCategoryWithPrice(resultSet));
+            }
+            return Optional.empty();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error finding category by id", e);
         }
     }
 

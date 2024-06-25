@@ -1,60 +1,74 @@
 package ua.edu.ukma.services;
 
-import ua.edu.ukma.dto.category.CategoryCreationDto;
-import ua.edu.ukma.dto.category.CategoryDto;
-import ua.edu.ukma.dto.category.CategoryPriceDto;
-import ua.edu.ukma.dto.category.CategoryUpdateDto;
+import ua.edu.ukma.dto.category.*;
 import ua.edu.ukma.entities.Category;
 
 import ua.edu.ukma.exceptions.ConstraintViolationException;
 import ua.edu.ukma.exceptions.EntityNotFountException;
 import ua.edu.ukma.repositories.CategoryRepository;
+import ua.edu.ukma.repositories.ProductRepository;
 
 import java.util.List;
 import java.util.Optional;
 
 public class CategoryService {
-    private final CategoryRepository repository;
+    private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
 
-    public CategoryService(CategoryRepository repository) {
-        this.repository = repository;
+    public CategoryService(CategoryRepository repository, ProductRepository productRepository) {
+        this.categoryRepository = repository;
+        this.productRepository = productRepository;
     }
 
     public CategoryDto createCategory(CategoryCreationDto categoryDto) {
-        if (repository.findCategoryByName(categoryDto.getName()).isPresent()) {
+        if (categoryRepository.findCategoryByName(categoryDto.getName()).isPresent()) {
             throw new ConstraintViolationException("Category with such name already exists");
         }
-        Category category = repository.createCategory(categoryDto);
+        Category category = categoryRepository.createCategory(categoryDto);
         return new CategoryDto(category);
     }
 
     public CategoryDto updateCategory(Integer categoryId, CategoryUpdateDto categoryDto) {
         Category category = findCategoryOrThrow(categoryId);
+        Optional<Category> categoryOptional = categoryRepository.findCategoryByName(categoryDto.getName());
+        if (categoryOptional.isPresent() && !categoryId.equals(categoryOptional.get().getId())) {
+            throw new ConstraintViolationException("Category with such name already exists");
+        }
         category.setName(categoryDto.getName());
         category.setDescription(categoryDto.getDescription());
-        repository.updateCategory(categoryId, category);
+        categoryRepository.updateCategory(categoryId, category);
         return new CategoryDto(category);
     }
 
     public void deleteCategory(Integer categoryId) {
         findCategoryOrThrow(categoryId);
-        repository.deleteCategory(categoryId);
+        categoryRepository.deleteCategory(categoryId);
     }
 
     public List<CategoryDto> findAllCategories() {
-        return repository.findAllCategories().stream().map(CategoryDto::new).toList();
+        return categoryRepository.findAllCategories().stream().map(CategoryDto::new).toList();
     }
 
     public List<CategoryPriceDto> findAllCategoriesWithPrice() {
-        return repository.findAllCategoriesPrice();
+        return categoryRepository.findAllCategoriesPrice();
     }
 
     public List<CategoryDto> findAllCategoriesWithNameLike(String name) {
-        return repository.findCategoriesWhereNameLike(name).stream().map(CategoryDto::new).toList();
+        return categoryRepository.findCategoriesWhereNameLike(name).stream().map(CategoryDto::new).toList();
+    }
+
+    public CategoryFullDto findCategoryWithPrice(Integer categoryId) {
+        Optional<CategoryPriceDto> category = categoryRepository.findCategoryWithPriceById(categoryId);
+        if (category.isPresent()) {
+            CategoryFullDto categoryFullDto = new CategoryFullDto(category.get());
+            categoryFullDto.setProducts(productRepository.findAllProductsByCategory(categoryId));
+            return categoryFullDto;
+        }
+        throw new EntityNotFountException("Category with such id does not exist");
     }
 
     private Category findCategoryOrThrow(Integer productId) {
-        Optional<Category> categoryOptional = repository.findCategoryById(productId);
+        Optional<Category> categoryOptional = categoryRepository.findCategoryById(productId);
         if (categoryOptional.isPresent()) {
             return categoryOptional.get();
         }

@@ -83,8 +83,16 @@ public class ProductService {
         return new ProductDto(findProductOrThrow(productId));
     }
 
+    public ProductPriceDto findProductWithPriceById(Integer productId) {
+        Optional<ProductPriceDto> product = productRepository.findProductWithPriceById(productId);
+        if (product.isPresent()) {
+            return product.get();
+        }
+        throw new EntityNotFountException("Product with such id does not exist");
+    }
+
     private Product findProductOrThrow(Integer productId) {
-        Optional<Product> productOptional = productRepository.findById(productId);
+        Optional<Product> productOptional = productRepository.findProductById(productId);
         if (productOptional.isPresent()) {
             return productOptional.get();
         }

@@ -31,6 +31,14 @@ public class ProductRepository {
             ON products.category_id = categories.id
             GROUP BY products.id, products.name, products.description, products.producer, products.amount, products.price, categories.name
             """;
+    private static final String FIND_PRODUCT_WITH_PRICE = """
+            SELECT products.id, products.name, products.description, products.producer, products.amount, products.price, categories.name AS category_name, products.amount * products.price AS total_price
+            FROM products
+            INNER JOIN categories
+            ON products.category_id = categories.id
+            WHERE products.id = ?
+            GROUP BY products.id, products.name, products.description, products.producer, products.amount, products.price, categories.name
+            """;
     private static final String FIND_ALL_CATEGORY_PRODUCTS = """
             SELECT products.id, products.name, products.description, products.producer, products.amount, products.price, categories.name AS category_name, products.amount * products.price AS total_price
             FROM products
@@ -124,12 +132,25 @@ public class ProductRepository {
         }
     }
 
-    public Optional<Product> findById(int id) {
+    public Optional<Product> findProductById(Integer productId) {
         try (PreparedStatement statement = connection.prepareStatement(FIND_BY_ID)) {
-            statement.setInt(1, id);
+            statement.setInt(1, productId);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return Optional.of(mapToProduct(resultSet));
+            }
+            return Optional.empty();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error finding product by id",e);
+        }
+    }
+
+    public Optional<ProductPriceDto> findProductWithPriceById(Integer productId) {
+        try (PreparedStatement statement = connection.prepareStatement(FIND_PRODUCT_WITH_PRICE)) {
+            statement.setInt(1, productId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return Optional.of(mapToProductPrice(resultSet));
             }
             return Optional.empty();
         } catch (SQLException e) {

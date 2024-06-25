@@ -25,8 +25,9 @@ public class RequestRouter extends BaseController implements HttpHandler {
         routes.put(new Request("/api/products/\\d+", "DELETE"), productController::deleteProduct);
 
         routes.put(new Request("/api/categories", "GET"), categoryController::findAllCategories);
-        routes.put(new Request("/api/categories", "POST"), categoryController::createCategory);
+        routes.put(new Request("/api/categories/\\d+", "GET"), categoryController::findCategoryById);
         routes.put(new Request("/api/categories/cost", "GET"), categoryController::findAllCategoriesWithPrice);
+        routes.put(new Request("/api/categories", "POST"), categoryController::createCategory);
         routes.put(new Request("/api/categories/\\d+", "PUT"), categoryController::updateCategory);
         routes.put(new Request("/api/categories/\\d+", "DELETE"), categoryController::deleteCategory);
     }
@@ -47,7 +48,7 @@ public class RequestRouter extends BaseController implements HttpHandler {
             }
         } catch (ResponseStatusException e) {
             System.out.println(e.getMessage());
-            e.printStackTrace();
+//            e.printStackTrace();
             setResponseBody(exchange, e.getMessage(), e.getStatusCode());
         } catch (Exception e) {
             System.out.println(e.getMessage());
