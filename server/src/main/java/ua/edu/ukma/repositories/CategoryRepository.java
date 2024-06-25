@@ -17,6 +17,7 @@ public class CategoryRepository {
     private static final String FIND_ALL_CATEGORIES = "SELECT * FROM categories";
     private static final String FIND_CATEGORY_BY_ID = "SELECT * FROM categories WHERE id = ?";
     private static final String FIND_CATEGORY_BY_NAME = "SELECT * FROM categories WHERE name ILIKE ?";
+    private static final String FIND_BY_NAME_STARTS_WITH = "SELECT * FROM categories WHERE name ILIKE ?";
     private static final String FIND_ALL_CATEGORIES_WITH_PRICE = """
     SELECT categories.id, categories.name, categories.description, SUM(products.amount * products.price) AS price
     FROM categories
@@ -93,6 +94,16 @@ public class CategoryRepository {
                 return Optional.of(mapToCategory(resultSet));
             }
             return Optional.empty();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error finding categories by name", e);
+        }
+    }
+
+    public List<Category> findCategoriesWhereNameLike(String name) {
+        try (PreparedStatement statement = connection.prepareStatement(FIND_BY_NAME_STARTS_WITH)) {
+            statement.setString(1, "%" + name + "%");
+            ResultSet resultSet = statement.executeQuery();
+            return mapToCategoryList(resultSet);
         } catch (SQLException e) {
             throw new RuntimeException("Error finding categories by name", e);
         }

@@ -45,8 +45,12 @@ public class CategoryService {
         return repository.findAllCategories().stream().map(CategoryDto::new).toList();
     }
 
-    public List<CategoryPriceDto> findAllCategoriesPrice() {
+    public List<CategoryPriceDto> findAllCategoriesWithPrice() {
         return repository.findAllCategoriesPrice();
+    }
+
+    public List<CategoryDto> findAllCategoriesWithNameLike(String name) {
+        return repository.findCategoriesWhereNameLike(name).stream().map(CategoryDto::new).toList();
     }
 
     private Category findCategoryOrThrow(Integer productId) {

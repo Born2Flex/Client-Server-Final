@@ -3,6 +3,7 @@ package ua.edu.ukma.controllers;
 import com.sun.net.httpserver.HttpExchange;
 import ua.edu.ukma.dto.category.CategoryCreationDto;
 import ua.edu.ukma.dto.category.CategoryDto;
+import ua.edu.ukma.dto.category.CategoryPriceDto;
 import ua.edu.ukma.dto.category.CategoryUpdateDto;
 import ua.edu.ukma.services.CategoryService;
 import ua.edu.ukma.services.JsonMapper;
@@ -10,6 +11,7 @@ import ua.edu.ukma.validator.Validator;
 import ua.edu.ukma.validator.Violation;
 
 import java.util.List;
+import java.util.Map;
 
 public class CategoryController extends BaseController {
     private final CategoryService categoryService;
@@ -36,8 +38,21 @@ public class CategoryController extends BaseController {
 
     public void findAllCategories(HttpExchange exchange) {
         System.out.println("Processing GET request on CategoryController");
-        List<CategoryDto> allCategories = categoryService.findAllCategories();
-        setResponseBody(exchange, mapper.toJson(allCategories), 200);
+        Map<String, String> requestParams = queryToMap(exchange.getRequestURI().getQuery());
+        if (requestParams.containsKey("name")) {
+            System.out.println("Processing GET BY NAME request on CategoryController");
+            List<CategoryDto> products = categoryService.findAllCategoriesWithNameLike(requestParams.get("name"));
+            setResponseBody(exchange, mapper.toJson(products), 200);
+        } else {
+            List<CategoryDto> allCategories = categoryService.findAllCategories();
+            setResponseBody(exchange, mapper.toJson(allCategories), 200);
+        }
+    }
+
+    public void findAllCategoriesWithPrice(HttpExchange exchange) {
+        System.out.println("Processing GET CATEGORIES WITH PRICE request on CategoryController");
+        List<CategoryPriceDto> categories = categoryService.findAllCategoriesWithPrice();
+        setResponseBody(exchange, mapper.toJson(categories), 200);
     }
 
     public void updateCategory(HttpExchange exchange) {

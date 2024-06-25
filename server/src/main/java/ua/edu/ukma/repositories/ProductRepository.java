@@ -193,7 +193,7 @@ public class ProductRepository {
         int amount = resultSet.getInt("amount");
         double price = resultSet.getDouble("price");
         String categoryName = resultSet.getString("category_name");
-        double totalPrice = resultSet.getDouble("totalPrice");
+        double totalPrice = resultSet.getDouble("total_price");
         return new ProductPriceDto(id, name, description, producer, price, amount, categoryName, totalPrice);
     }
 
