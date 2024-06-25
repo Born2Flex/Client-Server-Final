@@ -6,6 +6,8 @@ import ua.edu.ukma.dto.product.ProductDto;
 import ua.edu.ukma.dto.product.ProductExtDto;
 import ua.edu.ukma.services.JsonMapper;
 import ua.edu.ukma.services.ProductService;
+import ua.edu.ukma.validator.Validator;
+import ua.edu.ukma.validator.Violation;
 
 import java.util.List;
 import java.util.Map;
@@ -13,17 +15,24 @@ import java.util.Map;
 public class ProductController extends BaseController {
     private final ProductService productService;
     private final JsonMapper mapper;
+    private final Validator validator;
 
-    public ProductController(ProductService productService, JsonMapper mapper) {
+    public ProductController(ProductService productService, JsonMapper mapper, Validator validator) {
         this.productService = productService;
         this.mapper = mapper;
+        this.validator = validator;
     }
 
     public void createProduct(HttpExchange exchange) {
         System.out.println("Processing PUT request on Goods ProductController");
         ProductCreationDto productCreationDto = mapper.parseObject(getRequestBody(exchange), ProductCreationDto.class);
-        ProductDto createdProduct = productService.createProduct(productCreationDto);
-        setResponseBody(exchange, mapper.toJson(createdProduct), 201);
+        List<Violation> violations = validator.validate(productCreationDto);
+        if (violations.isEmpty()) {
+            ProductDto createdProduct = productService.createProduct(productCreationDto);
+            setResponseBody(exchange, mapper.toJson(createdProduct), 201);
+        } else {
+            setResponseBody(exchange, mapper.toJson(violations), 400);
+        }
     }
 
     public void findAllProducts(HttpExchange exchange) {
@@ -57,8 +66,13 @@ public class ProductController extends BaseController {
         System.out.println("Processing POST request on ProductController");
         Integer productId = getPathVariableOrThrow(exchange, 3);
         ProductDto productCreationDto = mapper.parseObject(getRequestBody(exchange), ProductDto.class);
-        ProductDto updatedProduct = productService.updateProduct(productId, productCreationDto);
-        setResponseBody(exchange, mapper.toJson(updatedProduct), 200);
+        List<Violation> violations = validator.validate(productCreationDto);
+        if (violations.isEmpty()) {
+            ProductDto updatedProduct = productService.updateProduct(productId, productCreationDto);
+            setResponseBody(exchange, mapper.toJson(updatedProduct), 200);
+        } else {
+            setResponseBody(exchange, mapper.toJson(violations), 400);
+        }
     }
 
     public void deleteProduct(HttpExchange exchange) {

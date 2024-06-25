@@ -1,7 +1,11 @@
 package ua.edu.ukma.dto.category;
 
+import ua.edu.ukma.validator.annotations.NotBlank;
+
 public class CategoryUpdateDto {
+    @NotBlank
     private String name;
+    @NotBlank
     private String description;
 
     public CategoryUpdateDto() {

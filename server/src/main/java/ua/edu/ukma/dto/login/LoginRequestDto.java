@@ -1,7 +1,11 @@
 package ua.edu.ukma.dto.login;
 
+import ua.edu.ukma.validator.annotations.NotBlank;
+
 public class LoginRequestDto {
+    @NotBlank
     private String username;
+    @NotBlank
     private String password;
 
     public LoginRequestDto() {

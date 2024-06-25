@@ -1,14 +1,23 @@
 package ua.edu.ukma.dto.product;
 
 import ua.edu.ukma.entities.Product;
+import ua.edu.ukma.validator.annotations.NotBlank;
+import ua.edu.ukma.validator.annotations.NotNull;
+import ua.edu.ukma.validator.annotations.Positive;
 
 public class ProductDto {
     private Integer id;
+    @NotBlank
     private String name;
+    @NotBlank
     private String description;
+    @NotBlank
     private String producer;
+    @Positive
     private Double price;
+    @Positive
     private Integer amount;
+    @NotNull
     private Integer categoryId;
 
     public ProductDto() {

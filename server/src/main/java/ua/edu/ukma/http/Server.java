@@ -12,9 +12,9 @@ import ua.edu.ukma.properties.PropertiesLoader;
 import ua.edu.ukma.repositories.CategoryRepository;
 import ua.edu.ukma.repositories.ProductRepository;
 import ua.edu.ukma.services.*;
+import ua.edu.ukma.validator.Validator;
 
 import javax.net.ssl.*;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.security.KeyStore;
 import java.util.Properties;
@@ -39,17 +39,18 @@ public class Server extends Thread {
             ProductRepository productRepository = new ProductRepository(connector.getConnection());
             CategoryRepository categoryRepository = new CategoryRepository(connector.getConnection());
 
-            ProductService productService = new ProductService(productRepository);
+            ProductService productService = new ProductService(productRepository, categoryRepository);
             CategoryService categoryService = new CategoryService(categoryRepository);
             JwtService jwtService = new JwtService();
             AuthService authService = new AuthService(jwtService);
 
             JsonMapper mapper = new JsonMapper();
+            Validator validator = new Validator();
 
             JwtAuthenticator jwtAuthenticator = new JwtAuthenticator(jwtService);
             RequestRouter router = new RequestRouter(new AuthController(authService, mapper),
-                    new ProductController(productService, mapper),
-                    new CategoryController(categoryService, mapper));
+                    new ProductController(productService, mapper, validator),
+                    new CategoryController(categoryService, mapper, validator));
 
             HttpsServer server = HttpsServer.create(new InetSocketAddress(port), 0);
             HttpContext context = server.createContext("/api", router);
