@@ -13,6 +13,8 @@ public class ProductUpdateDto {
     private String producer;
     @Positive
     private Double price;
+    @Positive
+    private Integer amount;
     private Integer increment;
     @NotNull
     private Integer categoryId;
@@ -20,13 +22,22 @@ public class ProductUpdateDto {
     public ProductUpdateDto() {
     }
 
-    public ProductUpdateDto(String name, String description, String producer, Double price, Integer increment, Integer categoryId) {
+    public ProductUpdateDto(String name, String description, String producer, Double price, Integer amount, Integer increment, Integer categoryId) {
         this.name = name;
         this.description = description;
         this.producer = producer;
         this.price = price;
+        this.amount = amount;
         this.increment = increment;
         this.categoryId = categoryId;
+    }
+
+    public Integer getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Integer amount) {
+        this.amount = amount;
     }
 
     public String getName() {
