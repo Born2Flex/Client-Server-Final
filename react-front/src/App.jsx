@@ -3,7 +3,7 @@ import RootLayout, { loader as rootLoader } from './layouts/RootLayout';
 import ErrorPage from './pages/ErrorPage';
 import HomePage from './pages/HomePage';
 import LoginPage, { loginAction, logOutAction } from './pages/LoginPage';
-import ProductsPage from './pages/products/ProductsPage';
+import ProductsPage, { createProductAction, productsLoader } from './pages/products/ProductsPage';
 import ProductPage from './pages/products/ProductPage';
 import CategoriesPage, { createCategoryAction, categoriesLoader } from './pages/categories/CategoriesPage';
 import CategoryPage from './pages/categories/CategoryPage';
@@ -29,10 +29,13 @@ function App() {
         },
         {
           path: 'products',
-          element: <ProductsPage />,
-          // loader: productsLoader,
           // action: searchProductsAction,
           children: [
+            {
+              index: true,
+              element: <ProductsPage />,
+              loader: productsLoader,
+            },
             {
               path: ':id',
               element: <ProductPage />,
@@ -40,7 +43,7 @@ function App() {
             },
             {
               path: 'new',
-              // action: createProductAction,
+              action: createProductAction,
             }
           ]
         },

@@ -6,6 +6,7 @@ import RowItem from '../../components/RowItem';
 
 function CategoriesPage() {
     const { categories } = useLoaderData();
+    console.log('Categories:', categories);
 
     return (
         <>
@@ -16,18 +17,19 @@ function CategoriesPage() {
             <table className='table'>
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th></th>
+                        {Object.keys(categories[0]).map(key => (
+                            <th key={key}>{key.toUpperCase()}</th>
+                        ))}
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {categories.map(category => (
-                        <RowItem key={category.id} category={category} />
+                        <RowItem key={category.id} item={category} />
                     ))}
                 </tbody>
-            </table></>
+            </table>
+        </>
     )
 }
 
@@ -87,4 +89,6 @@ export async function categoriesLoader() {
     catch (error) {
         console.error('Error loading categories:', error);
     }
+
+    return { categories: [] };
 }

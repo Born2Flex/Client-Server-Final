@@ -31,7 +31,8 @@
     background-color: white;
     z-index: 1000;
     position: fixed;
-    top: 30%;
+    /* top: 30%; */
+    margin-top: auto;
 }
 
 .form {

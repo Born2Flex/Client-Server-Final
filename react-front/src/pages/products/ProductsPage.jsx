@@ -1,48 +1,33 @@
 import React from 'react'
-import SearchInput from '../../components/SearchInput'
+import { useLoaderData, redirect } from 'react-router-dom'
 import NewItemButton from '../../components/NewItemButton'
+import SearchInput from '../../components/SearchInput'
+import RowItem from '../../components/RowItem';
 
 function ProductsPage() {
+    const { products, categories } = useLoaderData();
+    console.log('products:', products);
+
     return (
         <>
             <div className='dashboard'>
                 <SearchInput />
-                <NewItemButton name={'Product'} />
+                <NewItemButton name={'Product'} categoriesForDropdown={categories} />
             </div>
             <table className='table'>
                 <thead>
                     <tr>
-                        <th>Product 1</th>
-                        <th>Product 2</th>
-                        <th>Product 3</th>
+                        {Object.keys(products[0]).map(key => key != 'categoryId' && (
+                            <th key={key}>{key.toUpperCase()}</th>
+                        ))}
+                        <th>CATEGORY</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Row 1, Cell 1</td>
-                        <td>Row 1, Cell 2</td>
-                        <td>Row 1, Cell 3</td>
-                    </tr>
-                    <tr>
-                        <td>Row 2, Cell 1</td>
-                        <td>Row 2, Cell 2</td>
-                        <td>Row 2, Cell 3</td>
-                    </tr>
-                    <tr>
-                        <td>Row 3, Cell 1</td>
-                        <td>Row 3, Cell 2</td>
-                        <td>Row 3, Cell 3</td>
-                    </tr>
-                    <tr>
-                        <td>Row 4, Cell 1</td>
-                        <td>Row 4, Cell 2</td>
-                        <td>Row 4, Cell 3</td>
-                    </tr>
-                    <tr>
-                        <td>Row 5, Cell 1</td>
-                        <td>Row 5, Cell 2</td>
-                        <td>Row 5, Cell 3</td>
-                    </tr>
+                    {products.map(product => (
+                        <RowItem key={product.id} item={product} categoriesForDropdown={categories} />
+                    ))}
                 </tbody>
             </table>
         </>
@@ -50,3 +35,84 @@ function ProductsPage() {
 }
 
 export default ProductsPage
+
+export async function createProductAction({ request }) {
+    const data = await request.formData();
+
+    const productData = {
+        name: data.get('name'),
+        description: data.get('description'),
+        producer: data.get('producer'),
+        price: data.get('price'),
+        amount: data.get('amount'),
+        categoryId: data.get('categoryId')
+    };
+    console.log('Product data:', productData);
+
+    try {
+        const response = await fetch(`/api/products`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            },
+            body: JSON.stringify(productData)
+        });
+        const responseData = await response.text();
+        console.log('Create product response:', responseData);
+
+        if (!response.ok) {
+            console.error(`Error ${response.status}: ${responseData}`);
+            throw new Error(`Error ${response.status}: ${responseData}`);
+        }
+
+        console.log('Product created successfully:', responseData);
+    } catch (error) {
+        console.error('Error creating product:', error);
+    }
+
+    return redirect('/products');
+}
+
+export async function productsLoader() {
+    try {
+        const productsResponse = await fetch(`/api/products`, {
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            }
+        });
+        const responseData = await productsResponse.json();
+        console.log('products:', responseData);
+
+        if (!productsResponse.ok) {
+            console.error(`Error ${productsResponse.status}: ${responseData}`);
+            throw new Error(`Error ${productsResponse.status}: ${responseData}`);
+        }
+
+        const categoriesResponse = await fetch(`/api/categories`, {
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            }
+        });
+        const categoriesData = await categoriesResponse.json();
+        console.log('categories:', categoriesData);
+
+        if (!categoriesResponse.ok) {
+            console.error(`Error ${categoriesResponse.status}: ${categoriesData}`);
+            throw new Error(`Error ${categoriesResponse.status}: ${categoriesData}`);
+        }
+
+        return {
+            products: responseData,
+            categories: categoriesData
+        };
+    }
+    catch (error) {
+        console.error('Error loading products:', error);
+    }
+
+    return {
+        products: [],
+        categories: []
+    };
+}

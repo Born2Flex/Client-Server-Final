@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import styles from './RowItem.module.css';
 import { Link, NavLink } from 'react-router-dom';
 
-function RowItem({ category }) {
+function RowItem({ item, categoriesForDropdown = null }) {
     const [isEditing, setIsEditing] = useState(false);
-    const [categoryData, setCategoryData] = useState(category);
+    const [itemData, setItemData] = useState(item);
+    const itemType = categoriesForDropdown ? 'products' : 'categories';
+    console.log(categoriesForDropdown)
 
     const handleEditClick = () => {
         setIsEditing(true);
@@ -12,29 +14,44 @@ function RowItem({ category }) {
 
     const handleCancelClick = () => {
         setIsEditing(false);
-        setCategoryData(category);
+        setItemData(item);
     };
 
     const handleDeleteClick = () => {
         try {
-            fetch(`/api/categories/${categoryData.id}`, {
+            fetch(`/api/${itemType}/${itemData.id}`, {
                 method: 'DELETE',
                 headers: {
                     "Authorization": "Bearer " + localStorage.getItem('token')
                 }
             });
-            console.log(`Delete category with ID: ${categoryData.id}`);
+            console.log(`Delete item with ID: ${itemData.id}`);
             window.location.reload();
 
         } catch (error) {
-            console.error('Error deleting category:', error);
+            console.error('Error deleting item:', error);
         }
     };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        setCategoryData(prevState => ({
+        setItemData(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
+
+    const validateMin = (e) => {
+        if (e.target.value === '' || e.target.value === null) {
+            e.target.value = ''
+        }
+        else if (e.target.value < e.target.min) {
+            e.target.value = e.target.min;
+        }
+        const { name, value } = e.target;
+
+        setItemData(prevState => ({
             ...prevState,
             [name]: value
         }));
@@ -43,8 +60,8 @@ function RowItem({ category }) {
     const handleSaveClick = () => {
 
         try {
-            const { id, ...dataWithoutId } = categoryData;
-            fetch(`/api/categories/${categoryData.id}`, {
+            const { id, ...dataWithoutId } = itemData;
+            fetch(`/api/${itemType}/${itemData.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -52,11 +69,11 @@ function RowItem({ category }) {
                 },
                 body: JSON.stringify(dataWithoutId)
             });
-            console.log('Saved category:', categoryData);
+            console.log('Saved item:', itemData);
             setIsEditing(false);
         }
         catch (error) {
-            console.error('Error saving category:', error);
+            console.error('Error saving item:', error);
         }
 
     };
@@ -66,11 +83,33 @@ function RowItem({ category }) {
             {isEditing ? (
                 <>
                     <td>
-                        <input name="id" value={categoryData.id} onChange={handleChange} readOnly hidden />
-                        {categoryData.id}
+                        <input name="id" value={itemData.id} onChange={handleChange} readOnly hidden />
+                        {itemData.id}
                     </td>
-                    <td><input name="name" value={categoryData.name} onChange={handleChange} /></td>
-                    <td><input name="description" value={categoryData.description} onChange={handleChange} /></td>
+                    <td><input name="name" value={itemData.name} onChange={handleChange} /></td>
+                    <td><input name="description" value={itemData.description} onChange={handleChange} /></td>
+
+                    {categoriesForDropdown && (
+                        <>
+                            <td><input name="producer" value={itemData.producer} onChange={handleChange} /></td>
+                            <td><input type='number' min={0.01} name="price" value={itemData.price} onChange={validateMin} /></td>
+                            <td><input type='number' min={0} name="amount" value={itemData.amount} onChange={validateMin} /></td>
+                            <td>
+                                <select name='categoryId' value={itemData.categoryId} onChange={handleChange}>
+                                    {categoriesForDropdown.map(category => (
+                                        <option key={category.id} value={category.id}>{category.name}</option>
+                                    ))}
+                                </select>
+                            </td>
+                        </>
+                    )}
+                    {/* {
+                        Object.keys(itemData).map(key => key !== 'id' && (
+                            <td key={key}>
+                                <input name={key} value={itemData[key]} onChange={handleChange} />
+                            </td>
+                        ))
+                    } */}
                     <td>
                         <button className={styles.saveButton} onClick={handleSaveClick}>Save</button>
                         <button className={styles.cancelButton} onClick={handleCancelClick}>Cancel</button>
@@ -79,12 +118,19 @@ function RowItem({ category }) {
                 </>
             ) : (
                 <>
-                    <td>{categoryData.id}</td>
-                    <td><Link to={`${categoryData.id}`} className={styles.link}>{categoryData.name}</Link></td>
-                    <td>{categoryData.description}</td>
+                    <td>{itemData.id}</td>
+                    <td><Link to={`${itemData.id}`} className={styles.link}>{itemData.name}</Link></td>
+                    <td>{itemData.description}</td>
+                    {categoriesForDropdown && (
+                        <>
+                            <td>{itemData.producer}</td>
+                            <td>{itemData.price} ₴</td>
+                            <td>{itemData.amount}</td>
+                            <td>{categoriesForDropdown.find(category => category.id == itemData.categoryId).name}</td>
+                        </>
+                    )}
                     <td>
                         <button className={styles.editButton} onClick={handleEditClick}>Edit</button>
-                        {/* <Link to={`${categoryData.id}`} className={styles.editButton}>View</Link> */}
                     </td>
                 </>
             )}
