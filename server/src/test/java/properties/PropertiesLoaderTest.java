@@ -1,6 +1,5 @@
 package properties;
 
-
 import org.junit.jupiter.api.Test;
 import ua.edu.ukma.properties.PropertiesLoader;
 
@@ -9,9 +8,8 @@ import java.util.Properties;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PropertiesLoaderTest {
-
     @Test
-    void testLoadProperties_success() {
+    void testLoadProperties() {
         PropertiesLoader propertiesLoader = new PropertiesLoader();
         Properties properties = propertiesLoader.loadProperties();
 

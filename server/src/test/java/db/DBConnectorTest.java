@@ -24,7 +24,7 @@ class DBConnectorTest {
     }
 
     @Test
-    void connectionTest_ConnectionCreated() {
+    void connectionTestConnectionCreated() {
         DBConnector connector = new DBConnector(properties);
         assertDoesNotThrow(() -> {
             Connection connection = connector.getConnection();
@@ -33,7 +33,7 @@ class DBConnectorTest {
     }
 
     @Test
-    void connectionTest_TestCreatedConnection() {
+    void connectionTestExecuteQuery() {
         DBConnector connector = new DBConnector(properties);
         assertDoesNotThrow(() -> {
             Connection connection = connector.getConnection();
@@ -44,14 +44,12 @@ class DBConnectorTest {
     }
 
     @Test
-    void connectionTest_IncorrectUrl() {
+    void connectionTestIncorrectUrl() {
         properties = mock(Properties.class);
         when(properties.getProperty("url")).thenReturn("jdbcabc:h2:mem:testdb");
         when(properties.getProperty("username")).thenReturn("sa");
         when(properties.getProperty("password")).thenReturn("");
-        assertThrows(RuntimeException.class, () -> {
-            DBConnector connector = new DBConnector(properties);
-            connector.getConnection();
-        });
+        DBConnector connector = new DBConnector(properties);
+        assertThrows(RuntimeException.class, connector::getConnection);
     }
 }

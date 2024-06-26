@@ -16,28 +16,27 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class JwtAuthenticatorTest {
-
-    private JwtService jwtServiceMock;
+    private JwtService jwtService;
     private JwtAuthenticator jwtAuthenticator;
 
     @BeforeEach
     void setUp() {
-        jwtServiceMock = mock(JwtService.class);
-        jwtAuthenticator = new JwtAuthenticator(jwtServiceMock);
+        jwtService = mock(JwtService.class);
+        jwtAuthenticator = new JwtAuthenticator(jwtService);
     }
 
     @Test
-    void testAuthenticate_loginEndpoint() {
+    void testAuthenticate() {
         HttpExchange exchangeMock = mock(HttpExchange.class);
         when(exchangeMock.getRequestURI()).thenReturn(URI.create("/api/login"));
         Authenticator.Result result = jwtAuthenticator.authenticate(exchangeMock);
 
-        assertTrue(result instanceof Authenticator.Success);
+        assertInstanceOf(Authenticator.Success.class, result);
         assertEquals(":user", ((Authenticator.Success) result).getPrincipal().getName());
     }
 
     @Test
-    void testAuthenticate_missingAuthHeader() throws IOException {
+    void testAuthenticateMissingAuthHeader() throws IOException {
         HttpExchange exchangeMock = mock(HttpExchange.class);
         when(exchangeMock.getRequestURI()).thenReturn(URI.create("/api/test"));
         Headers headersMock = mock(Headers.class);
@@ -52,20 +51,20 @@ class JwtAuthenticatorTest {
 
         Authenticator.Result result = jwtAuthenticator.authenticate(exchangeMock);
 
-        assertTrue(result instanceof Authenticator.Failure);
+        assertInstanceOf(Authenticator.Failure.class, result);
         verify(exchangeMock).sendResponseHeaders(401, "Missing Authorization header".length());
         assertEquals("Missing Authorization header", os.toString());
     }
 
     @Test
-    void testAuthenticate_expiredToken() throws IOException {
+    void testAuthenticateExpiredToken() throws IOException {
         HttpExchange exchangeMock = mock(HttpExchange.class);
         when(exchangeMock.getRequestURI()).thenReturn(URI.create("/api/test"));
         Headers headersMock = mock(Headers.class);
         when(exchangeMock.getRequestHeaders()).thenReturn(headersMock);
         when(headersMock.getFirst("Authorization")).thenReturn("Bearer expiredToken");
 
-        when(jwtServiceMock.isExpired("expiredToken")).thenReturn(true);
+        when(jwtService.isExpired("expiredToken")).thenReturn(true);
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         when(exchangeMock.getResponseHeaders()).thenReturn(headersMock);
@@ -75,24 +74,24 @@ class JwtAuthenticatorTest {
 
         Authenticator.Result result = jwtAuthenticator.authenticate(exchangeMock);
 
-        assertTrue(result instanceof Authenticator.Failure);
+        assertInstanceOf(Authenticator.Failure.class, result);
         verify(exchangeMock).sendResponseHeaders(401, "Token is expired or invalid".length());
         assertEquals("Token is expired or invalid", os.toString());
     }
 
     @Test
-    void testAuthenticate_validToken() {
+    void testAuthenticateValidToken() {
         HttpExchange exchangeMock = mock(HttpExchange.class);
         when(exchangeMock.getRequestURI()).thenReturn(URI.create("/api/test"));
         Headers headersMock = mock(Headers.class);
         when(exchangeMock.getRequestHeaders()).thenReturn(headersMock);
         when(headersMock.getFirst("Authorization")).thenReturn("Bearer validToken");
 
-        when(jwtServiceMock.isExpired("validToken")).thenReturn(false);
+        when(jwtService.isExpired("validToken")).thenReturn(false);
 
         Authenticator.Result result = jwtAuthenticator.authenticate(exchangeMock);
 
-        assertTrue(result instanceof Authenticator.Success);
+        assertInstanceOf(Authenticator.Success.class, result);
         assertEquals(":user", ((Authenticator.Success) result).getPrincipal().getName());
     }
 }

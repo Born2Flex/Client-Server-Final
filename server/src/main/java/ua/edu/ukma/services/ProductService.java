@@ -11,11 +11,17 @@ import ua.edu.ukma.repositories.CategoryRepository;
 import ua.edu.ukma.repositories.ProductRepository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+
+    private final Map<Integer, Lock> productLocks = new ConcurrentHashMap<>();
 
     public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
@@ -37,25 +43,32 @@ public class ProductService {
     }
 
     public ProductDto updateProduct(Integer productId, ProductUpdateDto productDto) {
-        Optional<Product> productOptional = productRepository.findProductByName(productDto.getName());
-        if (productOptional.isPresent() && !productId.equals(productOptional.get().getId())) {
-            throw new ConstraintViolationException("Product with such name already exists");
+        Lock lock = productLocks.computeIfAbsent(productId, k -> new ReentrantLock());
+        lock.lock();
+        try {
+            Optional<Product> productOptional = productRepository.findProductByName(productDto.getName());
+            if (productOptional.isPresent() && !productId.equals(productOptional.get().getId())) {
+                throw new ConstraintViolationException("Product with such name already exists");
+            }
+            if (categoryRepository.findCategoryById(productDto.getCategoryId()).isEmpty()) {
+                throw new EntityNotFountException("Category with such id does not exist");
+            }
+            Product product = findProductOrThrow(productId);
+            Integer increment = productDto.getIncrement();
+            if (increment != null && increment < 0 && product.getAmount() + increment < 0) {
+                throw new ConstraintViolationException("Can't write off too much products");
+            }
+            product.setName(productDto.getName());
+            product.setDescription(productDto.getDescription());
+            product.setProducer(productDto.getProducer());
+            product.setPrice(productDto.getPrice());
+            product.setAmount(product.getAmount() + (increment != null ? increment : 0));
+            product.setCategoryId(productDto.getCategoryId());
+            productRepository.updateProduct(product);
+            return new ProductDto(product);
+        } finally {
+            lock.unlock();
         }
-        if (categoryRepository.findCategoryById(productDto.getCategoryId()).isEmpty()) {
-            throw new EntityNotFountException("Category with such id does not exist");
-        }
-        Product product = findProductOrThrow(productId);
-        if (productDto.getIncrement() < 0 && product.getAmount() + productDto.getIncrement() < 0) {
-            throw new ConstraintViolationException("Can't write off too much products");
-        }
-        product.setName(productDto.getName());
-        product.setDescription(productDto.getDescription());
-        product.setProducer(productDto.getProducer());
-        product.setPrice(productDto.getPrice());
-        product.setAmount(product.getAmount() + productDto.getIncrement());
-        product.setCategoryId(productDto.getCategoryId());
-        productRepository.updateProduct(product);
-        return new ProductDto(product);
     }
 
     public void deleteProduct(Integer productId) {

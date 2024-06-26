@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import ua.edu.ukma.db.DBInitializer;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
@@ -28,7 +27,7 @@ class DBInitializerTest {
     }
 
     @Test
-    void testInitialize_success() throws Exception {
+    void testInitialize() throws Exception {
         DBInitializer dbInitializer = new DBInitializer(connection);
         dbInitializer.initialize();
 
@@ -45,16 +44,15 @@ class DBInitializerTest {
     }
 
     @Test
-    void testInitialize_scriptRunnerException() {
-        ScriptRunner scriptRunnerMock = mock(ScriptRunner.class);
-        doThrow(new RuntimeException("Script runner error")).when(scriptRunnerMock).runScript(any(BufferedReader.class));
+    void testInitializeScriptRunnerException() {
+        ScriptRunner scriptRunner = mock(ScriptRunner.class);
+        doThrow(new RuntimeException("Script runner error")).when(scriptRunner).runScript(any(BufferedReader.class));
 
         DBInitializer dbInitializer = new DBInitializer(connection) {
             @Override
             public void initialize() {
                 ClassLoader classLoader = DBInitializer.class.getClassLoader();
                 InputStream input = classLoader.getResourceAsStream("ddl.sql");
-                ScriptRunner scriptRunner = scriptRunnerMock;
                 scriptRunner.setLogWriter(null);
                 scriptRunner.setSendFullScript(true);
                 scriptRunner.runScript(new BufferedReader(new InputStreamReader(input)));
